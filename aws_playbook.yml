@@ -22,6 +22,27 @@
       hostname: "{{ item.public_ip }}"
       groups: launched
     with_items: "{{ ec2.tagged_instances }}"
+
+  - name: Install and configure software
+    hosts: all
+    become: true
+    tasks:
+      - name: Install git
+        package:
+          name: git
+          state: present
+      - name: Install java11
+        package:
+          name: openjdk-11-jdk
+          state: present
+      - name: Install maven
+        package:
+          name: maven
+          state: present
+      - name: Install tomcat
+        package:
+          name: tomcat9
+          state: present
   
   - name: group "build" - make the artifact
   hosts: build
@@ -36,4 +57,5 @@
       shell: mvn package
       args:
         chdir: /tmp/boxfuse-sample-java-war-hello
+
   
