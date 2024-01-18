@@ -1,0 +1,24 @@
+---
+- name: deploy java-app in AWS EC2
+  hosts: local
+  become: yes
+  tasks:
+  - name: Creating EC2 Instances
+    ec2:
+      key_name: my-key1
+      region: us-east-2
+      instance_type: t2.micro
+      image_id: ami-1234567890
+      network:
+        assign_public_ip: true
+        security_group: default
+        vpc_subnet_id: subnet-0123456      
+      count: 2
+      wait: true
+    register: ec2
+
+  - name: Add build and deploy instances to host group
+    add_host:
+      hostname: "{{ item.public_ip }}"
+      groups: launched
+    with_items: "{{ ec2.tagged_instances }}"
