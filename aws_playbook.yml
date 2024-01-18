@@ -44,7 +44,7 @@
           name: tomcat9
           state: present
   
-  - name: group "build" - make the artifact
+  - name: Clone and build
   hosts: build
   become: true
   tasks:
@@ -52,22 +52,21 @@
     git:
       repo: 'https://github.com/boxfuse/boxfuse-sample-java-war-hello.git'
       dest: /tmp/boxfuse-sample-java-war-hello
-
   - name: Build Java project with Maven
       shell: mvn package
       args:
         chdir: /tmp/boxfuse-sample-java-war-hello
 
-  - name: group "build" - copy artifact to "prod" server
+  - name: copy app to prod server (aws) 
     hosts: build
     become: true
     tasks:
-    - name: copy app to prod server (aws) 
+    - name: copy app
       shell: rsync -avz /tmp/boxfuse-sample-java-war-hello/target/hello-1.0.war root@<prod_ip>:/usr/local/tomcat/webapps/
 
-  - name: Start and Enable Tomcat 10 on sever
+  - name: Start and Enable Tomcat9 on sever
     hosts: prod
     systemd:
-      name: tomcat
+      name: tomcat9
       state: started
       daemon_reload: true
