@@ -1,7 +1,7 @@
 ---
 - name: deploy java-app in AWS EC2
   hosts: local
-  become: yes
+  become: true
   tasks:
   - name: Creating EC2 Instances
     ec2:
@@ -58,4 +58,16 @@
       args:
         chdir: /tmp/boxfuse-sample-java-war-hello
 
-  
+  - name: group "build" - copy artifact to "prod" server
+    hosts: build
+    become: true
+    tasks:
+    - name: copy app to prod server (aws) 
+      shell: rsync -avz /tmp/boxfuse-sample-java-war-hello/target/hello-1.0.war root@<prod_ip>:/usr/local/tomcat/webapps/
+
+  - name: Start and Enable Tomcat 10 on sever
+    hosts: prod
+    systemd:
+      name: tomcat
+      state: started
+      daemon_reload: true
