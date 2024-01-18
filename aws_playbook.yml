@@ -22,3 +22,18 @@
       hostname: "{{ item.public_ip }}"
       groups: launched
     with_items: "{{ ec2.tagged_instances }}"
+  
+  - name: group "build" - make the artifact
+  hosts: build
+  become: true
+  tasks:
+  - name: Clone from Git repo
+    git:
+      repo: 'https://github.com/boxfuse/boxfuse-sample-java-war-hello.git'
+      dest: /tmp/boxfuse-sample-java-war-hello
+
+  - name: Build Java project with Maven
+      shell: mvn package
+      args:
+        chdir: /tmp/boxfuse-sample-java-war-hello
+  
